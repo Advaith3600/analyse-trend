@@ -10,6 +10,7 @@
     "build-backend": "cd backend && ./build.sh"
   },
   "dependencies": {
+    "@auth0/nextjs-auth0": "^3.5.0",
     "@chakra-ui/icons": "^1.1.5",
     "@chakra-ui/react": "1.8.9",
     "@chakra-ui/system": "^1.12.1",
