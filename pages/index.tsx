@@ -37,15 +37,11 @@ export const getServerSideProps = async () => {
 }
 
 export default function Chat(props: { apiKeyApp: string, access_token: string, issuer_base: string }) {
-  // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
-  const { apiKeyApp } = props;
   // Input States
   const [inputOnSubmit, setInputOnSubmit] = useState<string>('');
   const [inputCode, setInputCode] = useState<string>('');
   // Response message
   const [outputCode, setOutputCode] = useState<string>('');
-  // ChatGPT model
-  const [model, setModel] = useState<OpenAIModel>('gpt-3.5-turbo');
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -53,95 +49,27 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
   // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const inputColor = useColorModeValue('navy.700', 'white');
-  const iconColor = useColorModeValue('brand.500', 'white');
-  const bgIcon = useColorModeValue(
-    'linear-gradient(180deg, #FBFBFF 0%, #CACAFF 100%)',
-    'whiteAlpha.200',
-  );
   const brandColor = useColorModeValue('brand.500', 'white');
-  const buttonBg = useColorModeValue('white', 'whiteAlpha.100');
   const gray = useColorModeValue('gray.500', 'white');
-  const buttonShadow = useColorModeValue(
-    '14px 27px 45px rgba(112, 144, 176, 0.2)',
-    'none',
-  );
+
   const textColor = useColorModeValue('navy.700', 'white');
   const placeholderColor = useColorModeValue(
     { color: 'gray.500' },
     { color: 'whiteAlpha.600' },
   );
   const handleTranslate = async () => {
-    const apiKey = apiKeyApp;
-    setInputOnSubmit(inputCode);
-
-    // Chat post conditions(maximum number of characters, valid message etc.)
-    const maxCodeLength = model === 'gpt-3.5-turbo' ? 700 : 700;
-
-    if (!apiKeyApp?.includes('sk-') && !apiKey?.includes('sk-')) {
-      alert('Please enter an API key.');
-      return;
-    }
-
-    if (!inputCode) {
-      alert('Please enter your message.');
-      return;
-    }
-
-    if (inputCode.length > maxCodeLength) {
-      alert(
-        `Please enter code less than ${maxCodeLength} characters. You are currently at ${inputCode.length} characters.`,
-      );
-      return;
-    }
-    setOutputCode(' ');
+    if (loading) return;
     setLoading(true);
-    const controller = new AbortController();
-    const body: ChatBody = {
-      inputCode,
-      model,
-      apiKey,
-    };
+    setInputOnSubmit(inputCode);
+    const { data } = await axios.get('/api/token/');
+    const accessToken = data.access_token;
 
-    // -------------- Fetch --------------
-    const response = await fetch('/api/chatAPI', {
-      method: 'POST',
+    const result = await axios.post('http://localhost:5000/analyse_trend/', { input: inputCode }, {
       headers: {
-        'Content-Type': 'application/json',
-      },
-      signal: controller.signal,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      setLoading(false);
-      if (response) {
-        alert(
-          'Something went wrong went fetching from the API. Make sure to use a valid API key.',
-        );
+        Authorization: `Bearer ${accessToken}`
       }
-      return;
-    }
-
-    const data = response.body;
-
-    if (!data) {
-      setLoading(false);
-      alert('Something went wrong');
-      return;
-    }
-
-    const reader = data.getReader();
-    const decoder = new TextDecoder();
-    let done = false;
-
-    while (!done) {
-      setLoading(true);
-      const { value, done: doneReading } = await reader.read();
-      done = doneReading;
-      const chunkValue = decoder.decode(value);
-      setOutputCode((prevCode) => prevCode + chunkValue);
-    }
-
+    });
+    setOutputCode(result.data);
     setLoading(false);
   };
 
@@ -310,7 +238,7 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
           </Button>
         </Flex>
 
-        <Flex
+        {/* <Flex
           justify="center"
           mt="20px"
           direction={{ base: 'column', md: 'row' }}
@@ -330,7 +258,7 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
               ChatGPT May 12 Version
             </Text>
           </Link>
-        </Flex>
+        </Flex> */}
       </Flex>
     </Flex>
   );
