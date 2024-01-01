@@ -20,12 +20,14 @@ import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import NavLink from '../link/NavLink';
 import routes from '@/routes';
+import { useEffect, useState } from 'react';
+import globalStore from '@/global';
 
 export default function HeaderLinks(props: {
   secondary: boolean;
   setApiKey: any;
 }) {
-  const { secondary, setApiKey } = props;
+  const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
   // Chakra Color Mode
   const navbarIcon = useColorModeValue('gray.500', 'white');
@@ -36,17 +38,26 @@ export default function HeaderLinks(props: {
     '14px 17px 40px 4px rgba(112, 144, 176, 0.18)',
     '0px 41px 75px #081132',
   );
-  const buttonBg = useColorModeValue('transparent', 'navy.800');
-  const hoverButton = useColorModeValue(
-    { bg: 'gray.100' },
-    { bg: 'whiteAlpha.100' },
-  );
-  const activeButton = useColorModeValue(
-    { bg: 'gray.200' },
-    { bg: 'whiteAlpha.200' },
-  );
 
   const { user, isLoading } = useUser();
+
+  const [metadata, setMetadata] = useState<{ credits: number } | undefined>()
+
+  useEffect(() => {
+    if (user) {
+      const axios = require("axios").default;
+
+      const options = {
+          method: 'GET',
+          url: `${globalStore.get('auth0_base_url')}/api/v2/users/${user.sub}`,
+          headers: {authorization: `Bearer ${globalStore.get('access_token')}`}
+      };
+
+      axios.request(options).then((response: any) => {
+        setMetadata(response?.data?.app_metadata);
+      });
+    }
+  }, [user]);
 
   return (
     <Flex
@@ -60,6 +71,10 @@ export default function HeaderLinks(props: {
       borderRadius="30px"
       boxShadow={shadow}
     >
+      {metadata ? (
+        <Text px="10px" fontSize="14px">{metadata.credits} Credit{metadata.credits !== 1 ? 's' : ''}</Text>
+      ) : null}
+
       <SidebarResponsive routes={routes} />
 
       <Button

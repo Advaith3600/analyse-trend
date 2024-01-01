@@ -1,6 +1,7 @@
 'use client';
 /*eslint-disable*/
 
+import axios from 'axios';
 import Link from '@/components/link/Link';
 import MessageBoxChat from '@/components/MessageBox';
 import { ChatBody, OpenAIModel } from '@/types/types';
@@ -14,8 +15,28 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { MdAutoAwesome, MdEdit, MdPerson } from 'react-icons/md';
+import globalStore from '@/global';
 
-export default function Chat(props: { apiKeyApp: string }) {
+export const getServerSideProps = async () => {
+  const ISSUER_BASE = process.env.AUTH0_ISSUER_BASE_URL as string;
+  var options = {
+    method: 'POST',
+    url: `${ISSUER_BASE}/oauth/token`,
+    headers: {'content-type': 'application/x-www-form-urlencoded'},
+    data: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: process.env.AUTH0_CLIENT_ID as string,
+      client_secret: process.env.AUTH0_CLIENT_SECRET as string,
+      audience: `${ISSUER_BASE}/api/v2/`
+    })
+  };
+
+  const res = await axios.request(options);
+  
+  return { props: { access_token: res?.data?.access_token, issuer_base: ISSUER_BASE } };
+}
+
+export default function Chat(props: { apiKeyApp: string, access_token: string, issuer_base: string }) {
   // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
   const { apiKeyApp } = props;
   // Input States
@@ -123,6 +144,11 @@ export default function Chat(props: { apiKeyApp: string }) {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    globalStore.set('auth0_base_url', props.issuer_base);
+    globalStore.set('access_token', props.access_token);
+  }, []);
   // -------------- Copy Response --------------
   // const copyToClipboard = (text: string) => {
   //   const el = document.createElement('textarea');
