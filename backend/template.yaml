@@ -17,22 +17,40 @@ Resources:
       Runtime: python3.10
       Architectures:
         - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: AnalyseTrend-Chats
       Events:
         AnalyseTrendChatId:
           Type: Api
           Properties:
             Path: /analyse_trend/chat/{id}
             Method: get
+        AnalyseTrendChatIdOptions:
+          Type: Api
+          Properties:
+            Path: /analyse_trend/chat/{id}
+            Method: options
         AnalyseTrendChats:
           Type: Api
           Properties:
             Path: /analyse_trend/chats/
             Method: get
+        AnalyseTrendChatsOptions:
+          Type: Api
+          Properties:
+            Path: /analyse_trend/chats/
+            Method: options
         AnalyseTrendChat:
           Type: Api
           Properties:
             Path: /analyse_trend/chat/
             Method: post
+        AnalyseTrendChatOptions:
+          Type: Api
+          Properties:
+            Path: /analyse_trend/chat/
+            Method: options
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

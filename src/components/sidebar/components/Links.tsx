@@ -58,7 +58,7 @@ export function SidebarLinks() {
     });
   };
   
-  return chats.length ? <>createLinks(chats)</> : (
+  return chats.length ? <>{createLinks(chats)}</> : (
     <Flex
       align="center"
       justifyContent="space-between"
