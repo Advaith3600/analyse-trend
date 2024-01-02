@@ -11,7 +11,7 @@ from trends import get_reddit_trend, get_google_trends
 auth0 = Auth0()
 
 app = Flask(__name__)
-CORS(app, origins=[os.environ.get('ALLOWED_ORIGIN')], methods=['GET', 'POST', 'PUT'])
+CORS(app, origins=[os.environ.get('ALLOWED_ORIGIN')], methods=['GET', 'POST'])
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('AnalyseTrend-Chats')
@@ -117,18 +117,6 @@ def chat(id):
     )
 
     return jsonify(response['Item'])
-
-@app.route('/analyse_trend/profile/', methods=['PUT'])
-def update_profile():
-    response_status_code, response_parsed = auth0.get_data('/userinfo/', request.headers.get('Authorization'))
-    if response_status_code != 200:
-        return jsonify({"error": "Unauthorized"}), 401
-    
-    sub = response_parsed['sub']
-    token = auth0.get_token()
-    auth0.patch_data(f'/api/v2/users/{sub}', f'Bearer {token}', { 'name': request.get_json()['name'] })
-
-    return jsonify({ 'success': True })
 
 if __name__ == '__main__':
     app.run()

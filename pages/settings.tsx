@@ -1,22 +1,23 @@
-import { getAppAuth0Token } from "@/utils";
+import { getAuth0AppToken, getCredits } from "@/utils";
 import { useContext, useEffect, useState } from "react";
 import AppContext from '@/context';
 import { Input, Button, Image, Flex, useColorModeValue, useToast } from "@chakra-ui/react";
 import { useUser } from "@auth0/nextjs-auth0/client";
-import { withPageAuthRequired } from '@auth0/nextjs-auth0';
-import { GetServerSidePropsContext } from "next";
-import { ParsedUrlQuery } from "querystring";
+import { getSession, withPageAuthRequired } from '@auth0/nextjs-auth0';
 import axios from "axios";
 
-export const getServerSideProps = async (ctx: GetServerSidePropsContext<ParsedUrlQuery>) => {
-  const accessToken = await getAppAuth0Token()
-  return withPageAuthRequired({ 
-    returnTo: '/api/auth/login',
-    getServerSideProps: async () => ({ props: { access_token: accessToken, issuer_base: process.env.AUTH0_ISSUER_BASE_URL } })
-  })(ctx);
-};
+export const getServerSideProps = withPageAuthRequired({
+  returnTo: '/api/auth/login',
+  async getServerSideProps({ req, res }) {
+    const session = await getSession(req, res);
+    const accessToken = await getAuth0AppToken();
+    const credits = await getCredits(accessToken, session?.user?.sub);
+    
+    return { props: { issuer_base: process.env.AUTH0_ISSUER_BASE_URL, credits } };
+  }
+});
 
-const ProfileSettings = (props: { access_token: string, issuer_base: string }) => {
+const ProfileSettings = (props: { issuer_base: string, credits: number | null }) => {
   const toast = useToast();
 
   const appContext = useContext(AppContext);
@@ -52,13 +53,13 @@ const ProfileSettings = (props: { access_token: string, issuer_base: string }) =
 
   useEffect(() => {
     appContext.baseURL.current = props.issuer_base;
-    appContext.accessToken.current = props.access_token;
+    appContext.setCredits(props.credits);
   }, []);
 
   return user ? (
-    <Flex direction="column">
+    <Flex direction="column" maxW="900px" mx="auto">
       <Flex justify="center">
-        <Image borderRadius="full" w="200px" src={user.picture as string} alt={user.name as string} />
+        <Image borderRadius="full" w="200px" src={user.picture as string} alt={user.name as string} draggable={false} />
       </Flex>
 
       <Flex gap="0.25rem" mt="3rem">
@@ -76,6 +77,7 @@ const ProfileSettings = (props: { access_token: string, issuer_base: string }) =
           placeholder="Name..." 
           value={name}
           onChange={e => setName(e.target.value)} 
+          disabled={!isEditable()}
         />
         <Input 
           border="1px solid"

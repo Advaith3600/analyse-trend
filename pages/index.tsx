@@ -17,16 +17,24 @@ import { useContext, useEffect, useState } from 'react';
 import { MdAutoAwesome, MdPerson, MdBolt } from 'react-icons/md';
 import { Chat as ChatType } from '@/contextWrapper';
 import { OpenAIModel } from '@/types/types';
-import { getAppAuth0Token } from '@/utils';
+import { getAuth0AppToken, getCredits } from '@/utils';
 import IntroComponent from '@/intro';
+import { getSession } from '@auth0/nextjs-auth0';
+import { NextApiRequest, NextApiResponse } from 'next';
 
-export const getServerSideProps = async () => {
-  const accessToken = await getAppAuth0Token()
+export const getServerSideProps = async (ctx: { req: NextApiRequest; res: NextApiResponse; }) => {
+  const session = await getSession(ctx.req, ctx.res);
+  const props = { issuer_base: process.env.AUTH0_ISSUER_BASE_URL, credits: null };
+
+  if (! session) return { props };
+
+  const accessToken = await getAuth0AppToken();
+  props.credits = await getCredits(accessToken, session.user.sub);
   
-  return { props: { access_token: accessToken, issuer_base: process.env.AUTH0_ISSUER_BASE_URL } };
+  return { props };
 }
 
-export default function Chat(props: { apiKeyApp: string, access_token: string, issuer_base: string }) {
+export default function Chat(props: { apiKeyApp: string, credits: number | null, issuer_base: string }) {
   // Input States
   const [inputOnSubmit, setInputOnSubmit] = useState<string>('');
   const [inputCode, setInputCode] = useState<string>('');
@@ -93,7 +101,7 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
 
   useEffect(() => {
     appContext.baseURL.current = props.issuer_base;
-    appContext.accessToken.current = props.access_token;
+    appContext.setCredits(props.credits);
   }, []);
 
   useEffect(() => {

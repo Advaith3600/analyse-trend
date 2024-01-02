@@ -18,11 +18,21 @@ Resources:
       Architectures:
         - x86_64
       Events:
-        AnalyseTrend:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+        AnalyseTrendChatId:
+          Type: Api
           Properties:
-            Path: /analyse_trend
+            Path: /analyse_trend/chat/{id}
             Method: get
+        AnalyseTrendChats:
+          Type: Api
+          Properties:
+            Path: /analyse_trend/chats/
+            Method: get
+        AnalyseTrendChat:
+          Type: Api
+          Properties:
+            Path: /analyse_trend/chat/
+            Method: post
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function

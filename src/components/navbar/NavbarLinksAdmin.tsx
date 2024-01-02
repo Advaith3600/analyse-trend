@@ -20,7 +20,7 @@ import { SidebarResponsive } from '@/components/sidebar/Sidebar';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import NavLink from '../link/NavLink';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import AppContext from '@/context';
 
 export default function HeaderLinks() {
@@ -38,20 +38,6 @@ export default function HeaderLinks() {
   const { user, isLoading } = useUser();
   const appContext = useContext(AppContext);
 
-  useEffect(() => {
-    if (user) {
-      const options = {
-          method: 'GET',
-          url: `${appContext.baseURL.current}/api/v2/users/${user.sub}`,
-          headers: {authorization: `Bearer ${appContext.accessToken.current}`}
-      };
-
-      axios.request(options).then((response: any) => {
-        appContext.setCredits(response?.data?.app_metadata?.credits ?? null);
-      });
-    }
-  }, [user]);
-
   return (
     <Flex
       zIndex="100"
@@ -64,7 +50,7 @@ export default function HeaderLinks() {
       borderRadius="30px"
       boxShadow={shadow}
     >
-      {appContext.credits ? (
+      {appContext.credits !== null ? (
         <Text px="10px" fontSize="14px">{appContext.credits} Credit{appContext.credits !== 1 ? 's' : ''}</Text>
       ) : null}
 
