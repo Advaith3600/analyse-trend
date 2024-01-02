@@ -19,6 +19,12 @@ export default extendTheme(
   textareaStyles, // textarea styles
   switchStyles, // switch styles
   CardComponent, // card component
+  {
+    config: {
+      initialColorMode: 'system',
+      useSystemColorMode: true,
+    }
+  }
 );
 
 export interface CustomCardProps extends HTMLChakraProps<'div'>, ThemingProps {}

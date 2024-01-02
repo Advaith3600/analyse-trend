@@ -20,13 +20,11 @@ import { SidebarResponsive } from '@/components/sidebar/Sidebar';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import NavLink from '../link/NavLink';
-import routes from '@/routes';
-import { useEffect, useState } from 'react';
-import globalStore from '@/global';
+import { useContext, useEffect } from 'react';
+import AppContext from '@/context';
 
 export default function HeaderLinks(props: {
   secondary: boolean;
-  setApiKey: any;
 }) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
@@ -41,25 +39,18 @@ export default function HeaderLinks(props: {
   );
 
   const { user, isLoading } = useUser();
-
-  const [metadata, setMetadata] = useState<{ credits: number } | undefined>()
-
-  useEffect(() => {
-    const onCreditChange = (credits: number) => setMetadata({ credits });
-    globalStore.subscribe('onCreditChange', onCreditChange);
-    return () => globalStore.unsubscribe('onCreditChange', onCreditChange);
-  }, []);
+  const appContext = useContext(AppContext);
 
   useEffect(() => {
     if (user) {
       const options = {
           method: 'GET',
-          url: `${globalStore.get('auth0_base_url')}/api/v2/users/${user.sub}`,
-          headers: {authorization: `Bearer ${globalStore.get('access_token')}`}
+          url: `${appContext.baseURL.current}/api/v2/users/${user.sub}`,
+          headers: {authorization: `Bearer ${appContext.accessToken.current}`}
       };
 
       axios.request(options).then((response: any) => {
-        setMetadata(response?.data?.app_metadata);
+        appContext.setCredits(response?.data?.app_metadata?.credits ?? null);
       });
     }
   }, [user]);
@@ -76,11 +67,11 @@ export default function HeaderLinks(props: {
       borderRadius="30px"
       boxShadow={shadow}
     >
-      {metadata ? (
-        <Text px="10px" fontSize="14px">{metadata.credits} Credit{metadata.credits !== 1 ? 's' : ''}</Text>
+      {appContext.credits ? (
+        <Text px="10px" fontSize="14px">{appContext.credits} Credit{appContext.credits !== 1 ? 's' : ''}</Text>
       ) : null}
 
-      <SidebarResponsive routes={routes} />
+      <SidebarResponsive />
 
       <Button
         variant="no-hover"

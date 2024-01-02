@@ -31,7 +31,7 @@ class Auth0:
             headers={'Authorization': token},
         )
 
-        return response.status_code, response.json()
+        return response.status_code, response.json() if response.status_code == 200 else {}
 
     def patch_data(self, endpoint, token, data):
         response = requests.patch(

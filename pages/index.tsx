@@ -2,9 +2,8 @@
 /*eslint-disable*/
 
 import axios from 'axios';
-import Link from '@/components/link/Link';
 import MessageBoxChat from '@/components/MessageBox';
-import { ChatBody, OpenAIModel } from '@/types/types';
+import AppContext from '@/context';
 import {
   Button,
   Flex,
@@ -13,9 +12,9 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { MdAutoAwesome, MdEdit, MdPerson } from 'react-icons/md';
-import globalStore from '@/global';
+import { Chat as ChatType } from '@/contextWrapper';
 
 export const getServerSideProps = async () => {
   const ISSUER_BASE = process.env.AUTH0_ISSUER_BASE_URL as string;
@@ -45,6 +44,8 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
 
+  const appContext = useContext(AppContext);
+
   // API Key
   // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
@@ -62,39 +63,31 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
     setLoading(true);
     setInputOnSubmit(inputCode);
 
-    const { data } = await axios.get('/api/token/');
-    const result = await axios.post('http://localhost:5000/analyse_trend/', { input: inputCode }, {
+    const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, { input: inputCode }, {
       headers: {
-        Authorization: `Bearer ${data.accessToken}`
+        Authorization: `Bearer ${appContext.userToken}`
       }
     });
-    globalStore.notify('onCreditChange', result.data.credits);
     setOutputCode(result.data.output);
+    appContext.setCredits(result.data.credits);
+    appContext.refreshChats();
+    appContext.changeActiveChat(null);
     setLoading(false);
   };
 
   useEffect(() => {
-    globalStore.set('auth0_base_url', props.issuer_base);
-    globalStore.set('access_token', props.access_token);
+    appContext.baseURL.current = props.issuer_base;
+    appContext.accessToken.current = props.access_token;
   }, []);
-  // -------------- Copy Response --------------
-  // const copyToClipboard = (text: string) => {
-  //   const el = document.createElement('textarea');
-  //   el.value = text;
-  //   document.body.appendChild(el);
-  //   el.select();
-  //   document.execCommand('copy');
-  //   document.body.removeChild(el);
-  // };
 
-  // *** Initializing apiKey with .env.local value
-  // useEffect(() => {
-  // ENV file verison
-  // const apiKeyENV = process.env.NEXT_PUBLIC_OPENAI_API_KEY
-  // if (apiKey === undefined || null) {
-  //   setApiKey(apiKeyENV)
-  // }
-  // }, [])
+  useEffect(() => {
+    if (!appContext.activeChat) return;
+
+    const { activeChat: chat }: { activeChat: ChatType } = appContext;
+    setOutputCode(chat.chat.find(c => c.role === 'assistant')?.content || '');
+    setInputOnSubmit(chat.chat.find(c => c.role === 'user')?.content || '');
+    console.log(chat);
+  }, [appContext.activeChat]);
 
   const handleChange = (Event: any) => {
     setInputCode(Event.target.value);
@@ -160,14 +153,6 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
               >
                 {inputOnSubmit}
               </Text>
-              <Icon
-                cursor="pointer"
-                as={MdEdit}
-                ms="auto"
-                width="20px"
-                height="20px"
-                color={gray}
-              />
             </Flex>
           </Flex>
           <Flex w="100%">
@@ -188,7 +173,7 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
                 color="white"
               />
             </Flex>
-            <MessageBoxChat output={outputCode} />
+            <MessageBoxChat isLoading={loading} output={outputCode} />
           </Flex>
         </Flex>
         {/* Chat Input */}

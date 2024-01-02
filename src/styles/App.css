@@ -7,3 +7,7 @@ body {
 option {
   color: black;
 }
+
+.markdown p:not(:last-of-type) {
+  margin-bottom: 0.75rem !important;
+}

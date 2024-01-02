@@ -11,12 +11,12 @@ from trends import get_reddit_trend, get_google_trends
 auth0 = Auth0()
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:3000"], methods=['POST'])
+CORS(app, origins=["http://localhost:3000"], methods=['GET', 'POST'])
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('AnalyseTrend-Chats')
 
-@app.route('/analyse_trend/', methods=['POST'])
+@app.route('/analyse_trend/chat/', methods=['POST'])
 def index():
     response_status_code, response_parsed = auth0.get_data('/userinfo/', request.headers.get('Authorization'))
     if response_status_code != 200:
@@ -84,6 +84,34 @@ def index():
         'output': chat_completion.choices[0].message.content,
         'credits': credits - 1
     })
+
+@app.route('/analyse_trend/chats/')
+def chats():
+    response_status_code, response_parsed = auth0.get_data('/userinfo/', request.headers.get('Authorization'))
+    if response_status_code != 200:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    response = table.scan(
+        FilterExpression=boto3.dynamodb.conditions.Key('user_id').eq(response_parsed['sub']),
+        ProjectionExpression='title, id'
+    )
+
+    return jsonify(response['Items'])
+
+@app.route('/analyse_trend/chat/<id>/')
+def chat(id):
+    response_status_code, response_parsed = auth0.get_data('/userinfo/', request.headers.get('Authorization'))
+    if response_status_code != 200:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    response = table.get_item(
+        Key={
+            'id': id,
+            'user_id': response_parsed['sub']
+        }
+    )
+
+    return jsonify(response['Item'])
 
 if __name__ == '__main__':
     app.run()

@@ -23,16 +23,9 @@ import {
 import { Scrollbars } from 'react-custom-scrollbars-2';
 
 import { IoMenuOutline } from 'react-icons/io5';
-import { IRoute } from '@/types/navigation';
 import { isWindowAvailable } from '@/utils/navigation';
 
-export interface SidebarProps extends PropsWithChildren {
-  routes: IRoute[];
-  [x: string]: any;
-}
-
-function Sidebar(props: SidebarProps) {
-  const { routes, setApiKey } = props;
+function Sidebar() {
   // this is for the rest of the collapses
   let variantChange = '0.2s linear';
   let shadow = useColorModeValue(
@@ -69,7 +62,7 @@ function Sidebar(props: SidebarProps) {
           renderThumbVertical={renderThumb}
           renderView={renderView}
         >
-          <Content setApiKey={setApiKey} routes={routes} />
+          <Content />
         </Scrollbars>
       </Box>
     </Box>
@@ -77,13 +70,12 @@ function Sidebar(props: SidebarProps) {
 }
 
 // FUNCTIONS
-export function SidebarResponsive(props: { routes: IRoute[] }) {
+export function SidebarResponsive() {
   let sidebarBackgroundColor = useColorModeValue('white', 'navy.800');
   let menuColor = useColorModeValue('gray.400', 'white');
   // // SIDEBAR
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const { routes } = props;
   return (
     <Flex display={{ sm: 'flex', xl: 'none' }} alignItems="center">
       <Flex w="max-content" h="max-content" onClick={onOpen}>
@@ -132,7 +124,7 @@ export function SidebarResponsive(props: { routes: IRoute[] }) {
               renderThumbVertical={renderThumb}
               renderView={renderView}
             >
-              <Content routes={routes} />
+              <Content />
             </Scrollbars>
           </DrawerBody>
         </DrawerContent>

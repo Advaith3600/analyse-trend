@@ -2,8 +2,8 @@ import ReactMarkdown from 'react-markdown'
 import { useColorModeValue } from '@chakra-ui/react'
 import Card from '@/components/card/Card'
 
-export default function MessageBox(props: { output: string }) {
-  const { output } = props
+export default function MessageBox(props: { output: string, isLoading: boolean }) {
+  const { output, isLoading } = props
   const textColor = useColorModeValue('navy.700', 'white')
   return (
     <Card
@@ -16,9 +16,11 @@ export default function MessageBox(props: { output: string }) {
       lineHeight={{ base: '24px', md: '26px' }}
       fontWeight="500"
     >
-      <ReactMarkdown className="font-medium">
-        {output ? output : ''}
-      </ReactMarkdown>
+      {isLoading ? 'Loading...' : (
+        <ReactMarkdown className="font-medium markdown">
+          {output ? output : ''}
+        </ReactMarkdown>
+      )}
     </Card>
   )
 }
