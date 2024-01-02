@@ -21,7 +21,7 @@ export const getServerSideProps = async () => {
   const ISSUER_BASE = process.env.AUTH0_ISSUER_BASE_URL as string;
   var options = {
     method: 'POST',
-    url: `${ISSUER_BASE}/oauth/token`,
+    url: `${ISSUER_BASE}/oauth/token/`,
     headers: {'content-type': 'application/x-www-form-urlencoded'},
     data: new URLSearchParams({
       grant_type: 'client_credentials',
@@ -61,15 +61,15 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
     if (loading) return;
     setLoading(true);
     setInputOnSubmit(inputCode);
-    const { data } = await axios.get('/api/token/');
-    const accessToken = data.access_token;
 
+    const { data } = await axios.get('/api/token/');
     const result = await axios.post('http://localhost:5000/analyse_trend/', { input: inputCode }, {
       headers: {
-        Authorization: `Bearer ${accessToken}`
+        Authorization: `Bearer ${data.accessToken}`
       }
     });
-    setOutputCode(result.data);
+    globalStore.notify('onCreditChange', result.data.credits);
+    setOutputCode(result.data.output);
     setLoading(false);
   };
 

@@ -1,0 +1,4 @@
+commands = {
+    'keywords': "{\"title\": \"Generate a very small title\", \"reddit\": { \"subreddits\": [\"possible subreddits to search the keywords in\"], \"keywords\": [] }, \"gtrends\": []}. Extract essential keywords from the user query into the JSON so that they can be used to analyse the trend. Keywords genereated for reddit and gtrends will be used to query trend information from the respective sites. Make sure the keywords are solid enough to be used to query the trend in the respective sites.",
+    'analyse': 'Help the user deciding whether the idea he has have a market. Give sentimental analysis to it.'
+}

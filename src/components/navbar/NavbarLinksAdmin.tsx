@@ -15,6 +15,7 @@ import {
   useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react';
+import axios from 'axios';
 import { SidebarResponsive } from '@/components/sidebar/Sidebar';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { useUser } from '@auth0/nextjs-auth0/client';
@@ -44,9 +45,13 @@ export default function HeaderLinks(props: {
   const [metadata, setMetadata] = useState<{ credits: number } | undefined>()
 
   useEffect(() => {
-    if (user) {
-      const axios = require("axios").default;
+    const onCreditChange = (credits: number) => setMetadata({ credits });
+    globalStore.subscribe('onCreditChange', onCreditChange);
+    return () => globalStore.unsubscribe('onCreditChange', onCreditChange);
+  }, []);
 
+  useEffect(() => {
+    if (user) {
       const options = {
           method: 'GET',
           url: `${globalStore.get('auth0_base_url')}/api/v2/users/${user.sub}`,
