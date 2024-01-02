@@ -37,7 +37,7 @@ const AppContextWrapper = ({ children }: { children: ReactNode }) => {
     }
 
     const changeActiveChat = async (id: string | null) => {
-        if (id === null) setActiveChat(null);
+        if (id === null) return setActiveChat(null);
         
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/${id}/`, {
             headers: {

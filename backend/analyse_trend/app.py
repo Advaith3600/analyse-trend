@@ -18,6 +18,9 @@ table = dynamodb.Table('AnalyseTrend-Chats')
 
 @app.route('/analyse_trend/chat/', methods=['POST'])
 def index():
+    data = request.get_json()
+    input = data['input']
+
     response_status_code, response_parsed = auth0.get_data('/userinfo/', request.headers.get('Authorization'))
     if response_status_code != 200:
         return jsonify({"error": "Unauthorized"}), 401
@@ -28,14 +31,12 @@ def index():
 
     if user_response_status_code != 200:
         return jsonify({"error": "Oops! Something went wrong. Please try again."}), 500
-    elif user_response_parsed['app_metadata']['credits'] <= 0:
-        return jsonify({"error": "Please buy more credits to use the service."}), 403
     
     credits = user_response_parsed['app_metadata']['credits']
 
-    data = request.get_json()
-    input = data['input']
-
+    if credits <= 0 or (data['model'] == 'gpt-4' and credits < 3):
+        return jsonify({"error": "Please buy more credits to use the service."}), 403
+    
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
     response = client.chat.completions.create(
@@ -48,27 +49,30 @@ def index():
     )
 
     parsed_json = json.loads(response.choices[0].message.content)
-    print(parsed_json)
     reddit = get_reddit_trend(parsed_json['reddit']['subreddits'], parsed_json['reddit']['keywords'])
     google = get_google_trends(parsed_json['gtrends'])
 
-    chat_completion = client.chat.completions.create(model="gpt-3.5-turbo", messages=[
-        {
-            "role": "system",
-            "content": commands['analyse'] + f'\n{reddit}\n{google}'
-        },
-        { "role": "user", "content": input }
-    ])
+    chat_completion = client.chat.completions.create(
+        model='gpt-4-1106-preview' if data['model'] == 'gpt-4' else "gpt-3.5-turbo", 
+        messages=[
+            {
+                "role": "system",
+                "content": commands['analyse'] + f'\n{reddit}\n{google}'
+            },
+            { "role": "user", "content": input }
+        ]
+    )
 
     auth0.patch_data(f'/api/v2/users/{sub}', f'Bearer {token}', {
         "app_metadata": {
-            "credits": credits - 1
+            "credits": credits - (3 if data['model'] == 'gpt-4' else 1)
         }
     })
     
     response = table.put_item(Item={
         'id': chat_completion.id,
         'user_id': sub,
+        'context': f'\n{reddit}\n{google}',
         'chat': [
             { 'role': 'user', 'content': input },
             dict(chat_completion.choices[0].message)

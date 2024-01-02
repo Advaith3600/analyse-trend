@@ -13,8 +13,9 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
-import { MdAutoAwesome, MdEdit, MdPerson } from 'react-icons/md';
+import { MdAutoAwesome, MdPerson, MdBolt } from 'react-icons/md';
 import { Chat as ChatType } from '@/contextWrapper';
+import { OpenAIModel } from '@/types/types';
 
 export const getServerSideProps = async () => {
   const ISSUER_BASE = process.env.AUTH0_ISSUER_BASE_URL as string;
@@ -43,15 +44,25 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
   const [outputCode, setOutputCode] = useState<string>('');
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
+  const [model, setModel] = useState<OpenAIModel>('gpt-3.5');
 
   const appContext = useContext(AppContext);
 
   // API Key
   // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
+  const iconColor = useColorModeValue('brand.500', 'white');
+  const bgIcon = useColorModeValue(
+    'linear-gradient(180deg, #FBFBFF 0%, #CACAFF 100%)',
+    'whiteAlpha.200',
+  );
+  const buttonBg = useColorModeValue('white', 'whiteAlpha.100');
+  const buttonShadow = useColorModeValue(
+    '14px 27px 45px rgba(112, 144, 176, 0.2)',
+    'none',
+  );
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const inputColor = useColorModeValue('navy.700', 'white');
   const brandColor = useColorModeValue('brand.500', 'white');
-  const gray = useColorModeValue('gray.500', 'white');
 
   const textColor = useColorModeValue('navy.700', 'white');
   const placeholderColor = useColorModeValue(
@@ -63,7 +74,10 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
     setLoading(true);
     setInputOnSubmit(inputCode);
 
-    const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, { input: inputCode }, {
+    const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, { 
+      input: inputCode,
+      model
+    }, {
       headers: {
         Authorization: `Bearer ${appContext.userToken}`
       }
@@ -108,7 +122,88 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
         maxW="1000px"
       >
         {/* Model Change */}
-        <Flex direction={'column'} w="100%" mb={outputCode ? '20px' : 'auto'}></Flex>
+        <Flex direction={'column'} w="100%" mb={outputCode ? '20px' : 'auto'}>
+          <Flex
+            mx="auto"
+            zIndex="2"
+            w="max-content"
+            mb="20px"
+            borderRadius="60px"
+          >
+            <Flex
+              cursor={'pointer'}
+              transition="0.3s"
+              justify={'center'}
+              align="center"
+              bg={model === 'gpt-3.5' ? buttonBg : 'transparent'}
+              w="174px"
+              h="70px"
+              boxShadow={model === 'gpt-3.5' ? buttonShadow : 'none'}
+              borderRadius="14px"
+              color={textColor}
+              fontSize="18px"
+              fontWeight={'700'}
+              onClick={() => setModel('gpt-3.5')}
+            >
+              <Flex
+                borderRadius="full"
+                justify="center"
+                align="center"
+                bg={bgIcon}
+                me="10px"
+                h="39px"
+                w="39px"
+              >
+                <Icon
+                  as={MdAutoAwesome}
+                  width="20px"
+                  height="20px"
+                  color={iconColor}
+                />
+              </Flex>
+              <Flex direction="column">
+                <Text>GPT-3.5</Text>
+                <Text fontSize="xs" fontWeight="normal" opacity="0.6">1 Credit</Text>
+              </Flex>
+            </Flex>
+            <Flex
+              cursor={'pointer'}
+              transition="0.3s"
+              justify={'center'}
+              align="center"
+              bg={model === 'gpt-4' ? buttonBg : 'transparent'}
+              w="164px"
+              h="70px"
+              boxShadow={model === 'gpt-4' ? buttonShadow : 'none'}
+              borderRadius="14px"
+              color={textColor}
+              fontSize="18px"
+              fontWeight={'700'}
+              onClick={() => setModel('gpt-4')}
+            >
+              <Flex
+                borderRadius="full"
+                justify="center"
+                align="center"
+                bg={bgIcon}
+                me="10px"
+                h="39px"
+                w="39px"
+              >
+                <Icon
+                  as={MdBolt}
+                  width="20px"
+                  height="20px"
+                  color={iconColor}
+                />
+              </Flex>
+              <Flex direction="column">
+                <Text>GPT-4</Text>
+                <Text fontSize="xs" fontWeight="normal" opacity="0.6">3 Credits</Text>
+              </Flex>
+            </Flex>
+          </Flex>
+        </Flex>
         {/* Main Box */}
         <Flex
           direction="column"
