@@ -6,7 +6,7 @@ import routes from '@/routes';
 import Sidebar from '@/components/sidebar/Sidebar';
 import Footer from '@/components/footer/FooterAdmin';
 import Navbar from '@/components/navbar/NavbarAdmin';
-import { getActiveRoute, getActiveNavbar } from '@/utils/navigation';
+import { getActiveRoute } from '@/utils/navigation';
 import { usePathname } from 'next/navigation';
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 import '@/styles/App.css';
@@ -46,7 +46,6 @@ function App({ Component, pageProps }: AppProps<{}>) {
                     onOpen={onOpen}
                     logoText={'AnalyseTrend'}
                     brandText={getActiveRoute(routes, pathname)}
-                    secondary={getActiveNavbar(routes, pathname)}
                   />
                 </Box>
               </Portal>

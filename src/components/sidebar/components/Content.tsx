@@ -59,21 +59,23 @@ function SidebarContent() {
               {user.name}
             </Text>
 
-            <Button
-              variant="transparent"
-              border="1px solid"
-              borderColor={borderColor}
-              borderRadius="full"
-              w="34px"
-              h="34px"
-              px="0px"
-              minW="34px"
-              justifyContent={'center'}
-              alignItems="center"
-              me="10px"
-            >
-              <Icon as={MdOutlineSettings} width="16px" height="16px" color="inherit" />
-            </Button>
+            <Link href="/settings">
+              <Button
+                variant="transparent"
+                border="1px solid"
+                borderColor={borderColor}
+                borderRadius="full"
+                w="34px"
+                h="34px"
+                px="0px"
+                minW="34px"
+                justifyContent={'center'}
+                alignItems="center"
+                me="10px"
+              >
+                <Icon as={MdOutlineSettings} width="16px" height="16px" color="inherit" />
+              </Button> 
+            </Link>
             
             <Link href="/api/auth/logout">
               <Button

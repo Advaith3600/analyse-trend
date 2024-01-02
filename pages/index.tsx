@@ -11,29 +11,19 @@ import {
   Input,
   Text,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react';
 import { useContext, useEffect, useState } from 'react';
 import { MdAutoAwesome, MdPerson, MdBolt } from 'react-icons/md';
 import { Chat as ChatType } from '@/contextWrapper';
 import { OpenAIModel } from '@/types/types';
+import { getAppAuth0Token } from '@/utils';
+import IntroComponent from '@/intro';
 
 export const getServerSideProps = async () => {
-  const ISSUER_BASE = process.env.AUTH0_ISSUER_BASE_URL as string;
-  var options = {
-    method: 'POST',
-    url: `${ISSUER_BASE}/oauth/token/`,
-    headers: {'content-type': 'application/x-www-form-urlencoded'},
-    data: new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: process.env.AUTH0_CLIENT_ID as string,
-      client_secret: process.env.AUTH0_CLIENT_SECRET as string,
-      audience: `${ISSUER_BASE}/api/v2/`
-    })
-  };
-
-  const res = await axios.request(options);
+  const accessToken = await getAppAuth0Token()
   
-  return { props: { access_token: res?.data?.access_token, issuer_base: ISSUER_BASE } };
+  return { props: { access_token: accessToken, issuer_base: process.env.AUTH0_ISSUER_BASE_URL } };
 }
 
 export default function Chat(props: { apiKeyApp: string, access_token: string, issuer_base: string }) {
@@ -46,6 +36,7 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
   const [loading, setLoading] = useState<boolean>(false);
   const [model, setModel] = useState<OpenAIModel>('gpt-3.5');
 
+  const toast = useToast();
   const appContext = useContext(AppContext);
 
   // API Key
@@ -74,18 +65,29 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
     setLoading(true);
     setInputOnSubmit(inputCode);
 
-    const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, { 
-      input: inputCode,
-      model
-    }, {
-      headers: {
-        Authorization: `Bearer ${appContext.userToken}`
-      }
-    });
-    setOutputCode(result.data.output);
-    appContext.setCredits(result.data.credits);
-    appContext.refreshChats();
-    appContext.changeActiveChat(null);
+    try {
+      const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, { 
+        input: inputCode,
+        model
+      }, {
+        headers: {
+          Authorization: `Bearer ${appContext.userToken}`
+        }
+      });
+      setOutputCode(result.data.output);
+      appContext.setCredits(result.data.credits);
+      appContext.refreshChats();
+      appContext.changeActiveChat(null);
+    } catch (error: any) {
+      console.log(error);
+      toast({
+        title: error?.response?.data?.error,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'top-right'
+      });
+    }
     setLoading(false);
   };
 
@@ -100,7 +102,6 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
     const { activeChat: chat }: { activeChat: ChatType } = appContext;
     setOutputCode(chat.chat.find(c => c.role === 'assistant')?.content || '');
     setInputOnSubmit(chat.chat.find(c => c.role === 'user')?.content || '');
-    console.log(chat);
   }, [appContext.activeChat]);
 
   const handleChange = (Event: any) => {
@@ -340,6 +341,8 @@ export default function Chat(props: { apiKeyApp: string, access_token: string, i
           </Link>
         </Flex> */}
       </Flex>
+
+      <IntroComponent />
     </Flex>
   );
 }

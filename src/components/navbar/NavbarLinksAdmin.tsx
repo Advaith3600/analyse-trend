@@ -23,10 +23,7 @@ import NavLink from '../link/NavLink';
 import { useContext, useEffect } from 'react';
 import AppContext from '@/context';
 
-export default function HeaderLinks(props: {
-  secondary: boolean;
-}) {
-  const { secondary } = props;
+export default function HeaderLinks() {
   const { colorMode, toggleColorMode } = useColorMode();
   // Chakra Color Mode
   const navbarIcon = useColorModeValue('gray.500', 'white');
@@ -62,7 +59,7 @@ export default function HeaderLinks(props: {
       alignItems="center"
       flexDirection="row"
       bg={menuBg}
-      flexWrap={secondary ? { base: 'wrap', md: 'nowrap' } : 'unset'}
+      flexWrap={'unset'}
       p="10px"
       borderRadius="30px"
       boxShadow={shadow}

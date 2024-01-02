@@ -49,7 +49,9 @@ const AppContextWrapper = ({ children }: { children: ReactNode }) => {
     }
 
     useEffect(() => {
-        axios.get('/api/token/').then(({ data }) => setUserToken(data.accessToken));
+        axios.get('/api/token/')
+            .then(({ data }) => setUserToken(data.accessToken))
+            .catch(() => {});
     }, []);
 
     useEffect(() => {

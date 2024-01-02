@@ -3,34 +3,19 @@
 // Chakra Imports
 import {
   Box,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
   Flex,
   Link,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
 import AdminNavbarLinks from './NavbarLinksAdmin';
-import { isWindowAvailable } from '@/utils/navigation';
 
 export default function AdminNavbar(props: {
-  secondary: boolean;
   brandText: string;
   logoText: string;
   onOpen: (...args: any[]) => any;
 }) {
-  const [scrolled, setScrolled] = useState(false);
 
-  useEffect(() => {
-    isWindowAvailable() && window.addEventListener('scroll', changeNavbar);
-
-    return () => {
-      isWindowAvailable() && window.removeEventListener('scroll', changeNavbar);
-    };
-  });
-
-  const { secondary, brandText } = props;
+  const { brandText } = props;
 
   // Here are all the props that may change depending on navbar's type or state.(secondary, variant, scrolled)
   let mainText = useColorModeValue('navy.700', 'white');
@@ -45,13 +30,6 @@ export default function AdminNavbar(props: {
   let navbarBorder = 'transparent';
   let secondaryMargin = '0px';
   let gap = '0px';
-  const changeNavbar = () => {
-    if (isWindowAvailable() && window.scrollY > 1) {
-      setScrolled(true);
-    } else {
-      setScrolled(false);
-    }
-  };
 
   return (
     <Box
@@ -72,7 +50,7 @@ export default function AdminNavbar(props: {
       transition-property="box-shadow, background-color, filter, border"
       transitionTimingFunction="linear, linear, linear, linear"
       alignItems={{ xl: 'center' }}
-      display={secondary ? 'block' : 'flex'}
+      display={'flex'}
       minH="75px"
       justifyContent={{ xl: 'center' }}
       lineHeight="25.6px"
@@ -131,7 +109,7 @@ export default function AdminNavbar(props: {
           </Link>
         </Box>
         <Box ms="auto" w={{ sm: '100%', md: 'unset' }}>
-          <AdminNavbarLinks secondary={props.secondary} />
+          <AdminNavbarLinks />
         </Box>
       </Flex>
     </Box>
