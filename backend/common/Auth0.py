@@ -6,7 +6,7 @@ class Auth0:
     def __init__(self) -> None:
         self.clientID = os.environ.get("AUTH0_CLIENT_ID")
         self.clientSecret = os.environ.get("AUTH0_CLIENT_SECRET")
-        self.issuerBaseUrl = os.environ.get("AUTH0_ISSUER_BASE_URL")
+        self.issuerBaseUrl = 'https://' + os.environ.get("AUTH0_DOMAIN")
 
     def get_token(self):
         response = requests.post(

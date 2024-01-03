@@ -68,24 +68,20 @@ export default function Chat(props: { apiKeyApp: string, credits: number | null,
     { color: 'gray.500' },
     { color: 'whiteAlpha.600' },
   );
+
   const handleTranslate = async () => {
+    const _model: string = model;
     if (loading) return;
     setLoading(true);
     setInputOnSubmit(inputCode);
+    let result: any;
 
     try {
-      const result = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, { 
-        input: inputCode,
-        model
-      }, {
-        headers: {
-          Authorization: `Bearer ${appContext.userToken}`
-        }
-      });
-      setOutputCode(result.data.output);
-      appContext.setCredits(result.data.credits);
-      appContext.refreshChats();
-      appContext.changeActiveChat(null);
+      result = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/`, 
+        { input: inputCode, model: _model }, 
+        { headers: { Authorization: `Bearer ${appContext.userToken}` } }
+      );
     } catch (error: any) {
       console.log(error);
       toast({
@@ -95,8 +91,30 @@ export default function Chat(props: { apiKeyApp: string, credits: number | null,
         isClosable: true,
         position: 'top-right'
       });
+      setLoading(false);
     }
-    setLoading(false);
+
+    const checkChatStatus = async (chatId: string) => {
+      const result = await axios.get<ChatType>(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/${chatId}`, 
+        { headers: { Authorization: `Bearer ${appContext.userToken}` } }
+      );
+
+      setOutputCode(result?.data?.chat?.find(c => c.role === 'assistant')?.content || '');
+      appContext.setCredits((c: number) => c - (_model === 'gpt-4' ? 3 : 1));
+      appContext.refreshChats();
+      appContext.changeActiveChat(null);
+      setLoading(false);
+    }
+
+    if (result) {
+      const interval = setInterval(() => {
+        try {
+          checkChatStatus(result.data.id);
+          clearInterval(interval);
+        } catch (e: any) {}
+      }, 5000);
+    }
   };
 
   useEffect(() => {

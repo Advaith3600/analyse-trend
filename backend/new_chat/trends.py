@@ -1,11 +1,14 @@
 import os
 
+reddit_client_id = os.environ.get("REDDIT_CLIENT_ID")
+reddit_client_secret = os.environ.get("REDDIT_CLIENT_SECRET")
+
 def get_reddit_trend(subreddits, keywords):
     import praw
 
     reddit = praw.Reddit(
-        client_id=os.environ.get("REDDIT_CLIENT_ID"),
-        client_secret=os.environ.get("REDDIT_CLIENT_SECRET"),
+        client_id=reddit_client_id,
+        client_secret=reddit_client_secret,
         user_agent="AnalyseTrend"
     )
 

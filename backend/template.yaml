@@ -1,12 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  AnalyseTrend Backend
-
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
-Globals:
-  Function:
-    Timeout: 3
+Description: AnalyseTrend Backend
 
 Resources:
   AnalyseTrendFunction:
@@ -15,11 +9,23 @@ Resources:
       CodeUri: analyse_trend/
       Handler: lambda_handler.lambda_handler
       Runtime: python3.10
+      Timeout: 10
       Architectures:
         - x86_64
       Policies:
         - DynamoDBCrudPolicy:
             TableName: AnalyseTrend-Chats
+        - Statement:
+          - Effect: Allow
+            Action: lambda:InvokeFunction
+            Resource: !GetAtt AnalyseTrendNewChatFunction.Arn
+      Environment:
+        Variables:
+          NEW_CHAT_ARN: !GetAtt AnalyseTrendNewChatFunction.Arn
+          # ALLOWED_ORIGIN: !Sub '${ALLOWED_ORIGIN}'
+          # AUTH0_DOMAIN: !Sub '${AUTH0_DOMAIN}'
+          # AUTH0_CLIENT_ID: !Sub '${AUTH0_CLIENT_ID}'
+          # AUTH0_CLIENT_SECRET: !Sub '${AUTH0_CLIENT_SECRET}'
       Events:
         AnalyseTrendChatId:
           Type: Api
@@ -51,6 +57,27 @@ Resources:
           Properties:
             Path: /analyse_trend/chat/
             Method: options
+  AnalyseTrendNewChatFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: new_chat/
+      Handler: lambda_handler.lambda_handler
+      Runtime: python3.10
+      MemorySize: 1024
+      Timeout: 120
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: AnalyseTrend-Chats
+      # Environment:
+      #   Variables:
+      #     REDDIT_CLIENT_ID: !Sub '${REDDIT_CLIENT_ID}'
+      #     REDDIT_CLIENT_SECRET: !Sub '${REDDIT_CLIENT_SECRET}'
+      #     OPENAI_API_KEY: !Sub '${OPENAI_API_KEY}'
+      #     AUTH0_DOMAIN: !Sub '${AUTH0_DOMAIN}'
+      #     AUTH0_CLIENT_ID: !Sub '${AUTH0_CLIENT_ID}'
+      #     AUTH0_CLIENT_SECRET: !Sub '${AUTH0_CLIENT_SECRET}'
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -62,6 +89,9 @@ Outputs:
   AnalyseTrendFunction:
     Description: "AnalyseTrend Lambda Function ARN"
     Value: !GetAtt AnalyseTrendFunction.Arn
+  AnalyseTrendNewChatFunction:
+    Description: "AnalyseTrendNewChatFunction Lambda Function ARN"
+    Value: !GetAtt AnalyseTrendNewChatFunction.Arn
   AnalyseTrendFunctionIamRole:
     Description: "Implicit IAM Role created for AnalyseTrend function"
     Value: !GetAtt AnalyseTrendFunctionRole.Arn
