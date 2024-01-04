@@ -96,7 +96,7 @@ export default function Chat(props: { apiKeyApp: string, credits: number | null,
 
     const checkChatStatus = async (chatId: string) => {
       const result = await axios.get<ChatType>(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/${chatId}`, 
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chat/${chatId}/`, 
         { headers: { Authorization: `Bearer ${appContext.userToken}` } }
       );
 
@@ -108,9 +108,9 @@ export default function Chat(props: { apiKeyApp: string, credits: number | null,
     }
 
     if (result) {
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         try {
-          checkChatStatus(result.data.id);
+          await checkChatStatus(result.data.id);
           clearInterval(interval);
         } catch (e: any) {}
       }, 5000);

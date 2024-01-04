@@ -10,9 +10,7 @@ CHATS_TABLE = 'AnalyseTrend-Chats'
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 auth0 = Auth0()
 
-def lambda_handler(event, context):
-    data = json.loads(event)
-
+def lambda_handler(data, context):
     response = client.chat.completions.create(
         model="gpt-3.5-turbo-1106",
         response_format={ "type": "json_object" },
@@ -43,7 +41,7 @@ def lambda_handler(event, context):
 
     user_id = data['user_id']
     token = data['token']
-    credits = data['credits'] - 3 if data['model'] == 'gpt-4' else 1
+    credits = data['credits'] - (3 if data['model'] == 'gpt-4' else 1)
     auth0.patch_data(f'/api/v2/users/{user_id}', f'Bearer {token}', {
         "app_metadata": {
             "credits": credits
