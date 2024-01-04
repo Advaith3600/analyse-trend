@@ -13,11 +13,11 @@ export const getServerSideProps = withPageAuthRequired({
     const accessToken = await getAuth0AppToken();
     const credits = await getCredits(accessToken, session?.user?.sub);
     
-    return { props: { issuer_base: process.env.AUTH0_ISSUER_BASE_URL, credits } };
+    return { props: { credits } };
   }
 });
 
-const ProfileSettings = (props: { issuer_base: string, credits: number | null }) => {
+const ProfileSettings = (props: { credits: number | null }) => {
   const toast = useToast();
 
   const appContext = useContext(AppContext);
@@ -52,12 +52,11 @@ const ProfileSettings = (props: { issuer_base: string, credits: number | null })
   }, [user]);
 
   useEffect(() => {
-    appContext.baseURL.current = props.issuer_base;
     appContext.setCredits(props.credits);
   }, []);
 
   return user ? (
-    <Flex direction="column" maxW="900px" mx="auto">
+    <Flex direction="column" maxW="900px" mx="auto" mt={{ base: "4.5rem", md: '2rem' }}>
       <Flex justify="center">
         <Image borderRadius="full" w="200px" src={user.picture as string} alt={user.name as string} draggable={false} />
       </Flex>

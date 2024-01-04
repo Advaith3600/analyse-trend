@@ -40,7 +40,7 @@ export default function Footer() {
           AnalyseTrend. All Rights Reserved.
         </Text>
       </Text>
-      {/* <List display="flex">
+      <List display="flex">
         <ListItem
           me={{
             base: '10px',
@@ -51,9 +51,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.com/pro"
+            href="/refund-and-cancellation"
           >
-            Homepage
+            Refund
           </Link>
         </ListItem>
         <ListItem
@@ -66,9 +66,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.notion.site/End-User-License-Agreement-8fb09441ea8c4c08b60c37996195a6d5"
+            href="/support"
           >
-            License
+            Contact Us
           </Link>
         </ListItem>
         <ListItem
@@ -81,9 +81,9 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.notion.site/Terms-Conditions-6e79229d25ed48f48a481962bc6de3ee"
+            href="/terms-of-service"
           >
-            Terms of Use
+            Terms of Service
           </Link>
         </ListItem>
         <ListItem>
@@ -91,12 +91,12 @@ export default function Footer() {
             fontWeight="500"
             fontSize={{ base: 'xs', md: 'sm' }}
             color={textColor}
-            href="https://horizon-ui.notion.site/Privacy-Policy-8addde50aa8e408ca5c5f5811c38f971"
+            href="/privacy-policy"
           >
             Privacy Policy
           </Link>
         </ListItem>
-      </List> */}
+      </List>
     </Flex>
   );
 }

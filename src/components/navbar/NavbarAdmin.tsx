@@ -8,6 +8,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import AdminNavbarLinks from './NavbarLinksAdmin';
+import { FiArrowLeft } from 'react-icons/fi';
 
 export default function AdminNavbar(props: {
   brandText: string;
@@ -82,11 +83,24 @@ export default function AdminNavbar(props: {
           base: 'column',
           md: 'row',
         }}
-        alignItems={{ xl: 'center' }}
+        alignItems="center"
         mb={gap}
       >
-        <Box mb={{ base: '8px', md: '0px' }}>
-          {/* Here we create navbar brand, based on route name */}
+        <Flex direction="column" mb={{ base: '8px', md: '0px' }}>
+          {brandText === 'AnalyseTrend' ? null : (
+            <Link
+              href="/"
+              fontSize="sm"
+              mb="0.5rem"
+              display="flex"
+              alignItems="center"
+              gap="0.5rem"
+              width="fit-content"
+            >
+              <FiArrowLeft />
+              Go back
+            </Link>
+          )}
           <Link
             color={mainText}
             href="#"
@@ -107,8 +121,8 @@ export default function AdminNavbar(props: {
           >
             {brandText}
           </Link>
-        </Box>
-        <Box ms="auto" w={{ sm: '100%', md: 'unset' }}>
+        </Flex>
+        <Box ms="auto" me={{ base: 'auto', md: 0 }} mt={{ base: '0.5rem', md: 0 }}>
           <AdminNavbarLinks />
         </Box>
       </Flex>

@@ -1,11 +1,9 @@
 import { Html, Head, Main, NextScript } from 'next/document';
-import Script from 'next/script';
 
 export default function Document() {
   return (
     <Html lang="en">
       <Head>
-        <title>AnalyseTrend - AI-Powered Trend Analysis</title>
         <meta name="title" content="AnalyseTrend - AI-Powered Trend Analysis" />
         <meta name="description" content="AnalyseTrend is your hub for AI-driven project insights. Let our advanced AI models guide your project decisions and turn your ideas into successful ventures." />
 

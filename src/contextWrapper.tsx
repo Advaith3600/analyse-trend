@@ -23,8 +23,6 @@ const AppContextWrapper = ({ children }: { children: ReactNode }) => {
     const [chats, setChats] = useState<ChatBasic[]>([]);
     const [activeChat, setActiveChat] = useState<Chat | null>(null);
 
-    const baseURL = useRef('');
-
     const refreshChats = async () => {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/analyse_trend/chats/`, {
             headers: {
@@ -60,7 +58,7 @@ const AppContextWrapper = ({ children }: { children: ReactNode }) => {
     return (
         <AppContext.Provider 
             value={{
-                userToken, baseURL,
+                userToken, 
                 credits, setCredits, 
                 chats, refreshChats, 
                 activeChat, changeActiveChat

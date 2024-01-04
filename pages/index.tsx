@@ -24,17 +24,15 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 export const getServerSideProps = async (ctx: { req: NextApiRequest; res: NextApiResponse; }) => {
   const session = await getSession(ctx.req, ctx.res);
-  const props = { issuer_base: process.env.AUTH0_ISSUER_BASE_URL, credits: null };
-
-  if (! session) return { props };
+  if (! session) return { props: { credits: null } };
 
   const accessToken = await getAuth0AppToken();
-  props.credits = await getCredits(accessToken, session.user.sub);
+  const credits = await getCredits(accessToken, session.user.sub);
   
-  return { props };
+  return { props: { credits } };
 }
 
-export default function Chat(props: { apiKeyApp: string, credits: number | null, issuer_base: string }) {
+export default function Chat(props: { apiKeyApp: string, credits: number | null }) {
   // Input States
   const [inputOnSubmit, setInputOnSubmit] = useState<string>('');
   const [inputCode, setInputCode] = useState<string>('');
@@ -118,7 +116,6 @@ export default function Chat(props: { apiKeyApp: string, credits: number | null,
   };
 
   useEffect(() => {
-    appContext.baseURL.current = props.issuer_base;
     appContext.setCredits(props.credits);
   }, []);
 
@@ -344,28 +341,6 @@ export default function Chat(props: { apiKeyApp: string, credits: number | null,
             Submit
           </Button>
         </Flex>
-
-        {/* <Flex
-          justify="center"
-          mt="20px"
-          direction={{ base: 'column', md: 'row' }}
-          alignItems="center"
-        >
-          <Text fontSize="xs" textAlign="center" color={gray}>
-            Free Research Preview. ChatGPT may produce inaccurate information
-            about people, places, or facts.
-          </Text>
-          <Link href="https://help.openai.com/en/articles/6825453-chatgpt-release-notes">
-            <Text
-              fontSize="xs"
-              color={textColor}
-              fontWeight="500"
-              textDecoration="underline"
-            >
-              ChatGPT May 12 Version
-            </Text>
-          </Link>
-        </Flex> */}
       </Flex>
 
       <IntroComponent />
