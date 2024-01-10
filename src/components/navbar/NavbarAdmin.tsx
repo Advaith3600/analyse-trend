@@ -9,6 +9,7 @@ import {
 } from '@chakra-ui/react';
 import AdminNavbarLinks from './NavbarLinksAdmin';
 import { FiArrowLeft } from 'react-icons/fi';
+import NextLink from 'next/link';
 
 export default function AdminNavbar(props: {
   brandText: string;
@@ -88,18 +89,19 @@ export default function AdminNavbar(props: {
       >
         <Flex direction="column" mb={{ base: '8px', md: '0px' }}>
           {brandText === 'AnalyseTrend' ? null : (
-            <Link
-              href="/"
-              fontSize="sm"
-              mb="0.5rem"
-              display="flex"
-              alignItems="center"
-              gap="0.5rem"
-              width="fit-content"
-            >
-              <FiArrowLeft />
-              Go back
-            </Link>
+            <NextLink href="/" passHref>
+              <Link
+                fontSize="sm"
+                mb="0.5rem"
+                display="flex"
+                alignItems="center"
+                gap="0.5rem"
+                width="fit-content"
+              >
+                <FiArrowLeft />
+                Go back
+              </Link>
+            </NextLink>
           )}
           <Link
             color={mainText}

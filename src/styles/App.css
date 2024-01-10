@@ -35,3 +35,8 @@ option {
 .default-styling ul {
   padding-left: 1.5rem;
 }
+
+#nprogress .bar {
+  height: 4px;
+  background: var(--nprogress-color) !important;
+}

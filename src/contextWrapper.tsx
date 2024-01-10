@@ -1,5 +1,6 @@
 import AppContext from '@/context';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { useColorModeValue } from '@chakra-ui/system';
 import axios from 'axios';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 
@@ -44,6 +45,11 @@ const AppContextWrapper = ({ children }: { children: ReactNode }) => {
 
         setActiveChat(response.data);
     }
+
+    const progressColor = useColorModeValue('#4a25e1', 'white');
+    useEffect(() => {
+        document.documentElement.style.setProperty('--nprogress-color', progressColor);
+    }, [progressColor]);
 
     useEffect(() => {
         axios.get('/api/token/')

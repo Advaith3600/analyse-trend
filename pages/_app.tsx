@@ -1,4 +1,11 @@
 'use client';
+
+// import '@/nprogress'
+import '@/styles/App.css';
+import '@/styles/Contact.css';
+import '@/styles/Plugins.css';
+import '@/styles/MiniCalendar.css';
+
 import type { AppProps } from 'next/app';
 import { ChakraProvider, Box, Portal, useDisclosure } from '@chakra-ui/react';
 import theme from '@/theme/theme';
@@ -9,18 +16,26 @@ import Navbar from '@/components/navbar/NavbarAdmin';
 import { getActiveRoute } from '@/utils/navigation';
 import { usePathname } from 'next/navigation';
 import { UserProvider } from '@auth0/nextjs-auth0/client';
-import '@/styles/App.css';
-import '@/styles/Contact.css';
-import '@/styles/Plugins.css';
-import '@/styles/MiniCalendar.css';
 import AppContextWrapper from '@/contextWrapper';
 import Script from 'next/script';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
+import NProgress from 'nprogress';
+
+NProgress.configure({ showSpinner: false });
 
 function App({ Component, pageProps }: AppProps<{}>) {
   const pathname = usePathname();
   const activeRoute = getActiveRoute(routes, pathname);
   const { onOpen } = useDisclosure();
+  
+  const router = useRouter();
+  useEffect(() => {
+    router.events.on('routeChangeStart', () =>  NProgress.start());
+    router.events.on('routeChangeComplete', () =>  NProgress.done());
+    router.events.on('routeChangeError', () =>  NProgress.done());
+  }, []);
 
   return (
     <>
